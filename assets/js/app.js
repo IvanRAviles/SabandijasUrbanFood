@@ -1,5 +1,5 @@
 /* =========================================
-   1. DATA: EMBEDDED MENU (Guarantees Loading)
+   1. EMBEDDED MENU DATA (Guaranteed Load)
    ========================================= */
 const DEFAULT_MENU = [
     { id: "e1", section: "entradas", name: "DEDOS DE QUESO", desc: "5 pz empanizados en panko con salsa de tomate.", price: 100, img: "" },
@@ -62,7 +62,7 @@ const DEFAULT_MENU = [
 ];
 
 /* =========================================
-   2. CONFIG: PASTE YOUR FIREBASE KEYS HERE
+   2. CONFIG: PASTE YOUR KEYS BELOW
    ========================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyDAtElJUPzlT2rsKzQOC_e4mtQN9EgL_TY",
@@ -76,7 +76,7 @@ const firebaseConfig = {
 /* =========================================
    3. APP STATE
    ========================================= */
-let MENU_DATA = [...DEFAULT_MENU]; // Load defaults immediately
+let MENU_DATA = [...DEFAULT_MENU];
 let CART = [];
 let db, auth;
 let isAdmin = false;
@@ -85,52 +85,55 @@ let isAdmin = false;
    4. INIT SEQUENCE
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-    // A. Render Default Data Instantly (Solves "Not Loading")
+    // 1. Render immediately with static data (Bulletproof)
     renderMenu();
-    try { renderGallery(); } catch(e) { console.log("Gallery init skip"); }
+    try { renderGallery(); } catch(e) {}
 
-    // B. Attempt Firebase Connection (Async)
-    setTimeout(initFirebase, 100); 
+    // 2. Try Firebase (Async)
+    setTimeout(initFirebase, 200);
 });
 
 function initFirebase() {
-    try {
-        if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+    if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+        try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             auth = firebase.auth();
             
-            // Listen for Login Status
+            // AUTH STATE LISTENER
             auth.onAuthStateChanged(user => {
                 if (user) {
-                    // USER IS LOGGED IN
-                    console.log("Admin Logged In:", user.email);
+                    console.log("Admin Connected");
                     isAdmin = true;
-                    // Update UI
+                    // Show "Logout" view in modal
+                    document.getElementById('view-login-form').style.display = 'none';
+                    document.getElementById('view-logout-form').style.display = 'block';
+                    // Show floating + button
                     document.getElementById('admin-add-btn').classList.add('visible');
-                    document.getElementById('login-view').style.display = 'none';
-                    document.getElementById('logout-view').style.display = 'block';
+                    // Hide lock button (optional, or keep it to allow logout access)
+                    // document.getElementById('admin-lock-btn').style.display = 'none'; 
                     
-                    // Attempt to load live data
+                    // Load Live Data
                     loadFromDatabase(); 
                 } else {
-                    // USER IS LOGGED OUT
-                    console.log("User Logged Out");
+                    console.log("User Guest");
                     isAdmin = false;
+                    // Show "Login" view in modal
+                    document.getElementById('view-login-form').style.display = 'block';
+                    document.getElementById('view-logout-form').style.display = 'none';
+                    // Hide floating + button
                     document.getElementById('admin-add-btn').classList.remove('visible');
-                    document.getElementById('login-view').style.display = 'block';
-                    document.getElementById('logout-view').style.display = 'none';
                     
-                    // Re-render to remove edit buttons
-                    renderMenu(); 
+                    renderMenu(); // Re-render to hide edit buttons
                 }
             });
-            
-            // Even if not logged in, try to load latest menu data
+
+            // Initial Load (even if not logged in)
             loadFromDatabase();
+
+        } catch (e) {
+            console.warn("Firebase Init Error (AdBlock?):", e);
         }
-    } catch (e) {
-        console.warn("Firebase failed to init (AdBlock?). Using static data.");
     }
 }
 
@@ -139,13 +142,12 @@ async function loadFromDatabase() {
     try {
         const snapshot = await db.collection('menu').get();
         if (!snapshot.empty) {
-            // Overwrite static data with live data
             MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderMenu();
             console.log("Menu synced with Database");
         }
     } catch (e) {
-        console.log("Could not load from DB, using fallback.");
+        console.log("DB Offline/Blocked. Using Static.");
     }
 }
 
@@ -156,7 +158,7 @@ function renderMenu() {
     const container = document.getElementById('menu-list');
     if(!container) return;
     
-    container.innerHTML = ''; // Clear loading spinner
+    container.innerHTML = ''; 
 
     const sections = {
         entradas: "Entradas",
@@ -183,7 +185,7 @@ function renderMenu() {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
-                // Admin Edit Controls (Only if isAdmin is true)
+                // Admin Buttons
                 let adminHtml = '';
                 if (isAdmin) {
                     adminHtml = `
@@ -193,7 +195,7 @@ function renderMenu() {
                         </div>`;
                 }
 
-                // Options Dropdown
+                // Options
                 let selectHtml = '';
                 if(item.options && item.options.length > 0) {
                     selectHtml = `<select class="modern-select" id="opt-${item.id}">`;
@@ -204,10 +206,9 @@ function renderMenu() {
                     selectHtml += `</select>`;
                 }
 
-                // Image Handling
+                // Image
                 let imgHtml = '';
-                if(item.img && item.img.trim() !== "") {
-                    // The onerror makes the image disappear if the URL is broken
+                if(item.img && item.img.trim().length > 5) {
                     imgHtml = `<div style="height:180px; overflow:hidden; border-radius:12px 12px 0 0; margin:-15px -15px 10px -15px;">
                         <img src="${item.img}" style="width:100%; height:100%; object-fit:cover;" onclick="openLightbox('${item.img}')" onerror="this.style.display='none'">
                     </div>`;
@@ -235,11 +236,10 @@ function renderGallery() {
     if(!wrapper) return;
     wrapper.innerHTML = '';
     
-    // Inject 1.jpeg to 15.jpeg
     for (let i = 1; i <= 15; i++) {
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
-        // 'onerror' hides image if file is missing
+        // 'onerror' is crucial to hide broken images
         slide.innerHTML = `<img src="assets/images/${i}.jpeg" onclick="openLightbox(this.src)" onerror="this.parentElement.style.display='none'">`;
         wrapper.appendChild(slide);
     }
@@ -346,8 +346,6 @@ function sendOrder() {
     });
     const total = CART.reduce((sum, i) => sum + i.price, 0);
     msg += `%0A*TOTAL: $${total}*`;
-    
-    // Replace with your real phone number
     window.open(`https://wa.me/5216868798922?text=${msg}`, '_blank');
 }
 
@@ -355,30 +353,30 @@ function sendOrder() {
    7. ADMIN AUTH & LOGIC
    ========================================= */
 function openLoginModal() { document.getElementById('login-modal').classList.add('open'); }
+function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); }
 
 function loginAdmin() {
     const e = document.getElementById('admin-email').value;
     const p = document.getElementById('admin-pass').value;
     if(auth) {
         auth.signInWithEmailAndPassword(e, p)
-            .then(() => document.getElementById('login-modal').classList.remove('open'))
-            .catch(err => alert("Login Fallido: " + err.message));
+            .then(() => closeLoginModal())
+            .catch(err => alert("Error: " + err.message));
     } else {
-        alert("Firebase no está conectado.");
+        alert("Firebase no conectado (Revise Keys o Bloqueador de Anuncios)");
     }
 }
 
 function logoutAdmin() {
     if(auth) {
         auth.signOut().then(() => {
-            alert("Sesión cerrada.");
-            document.getElementById('login-modal').classList.remove('open');
+            alert("Sesión Cerrada");
+            closeLoginModal();
         });
     }
 }
 
 function openEditModal(id) {
-    // If id provided, Edit Mode. If not, New Item Mode.
     if(id) {
         const item = MENU_DATA.find(i => i.id === id);
         if(item) {
@@ -387,7 +385,7 @@ function openEditModal(id) {
             document.getElementById('edit-name').value = item.name;
             document.getElementById('edit-desc').value = item.desc || "";
             document.getElementById('edit-price').value = item.price;
-            document.getElementById('edit-img').value = item.img || ""; // Image Field
+            document.getElementById('edit-img').value = item.img || "";
             document.getElementById('modal-title').innerText = "Editar Platillo";
         }
     } else {
@@ -410,9 +408,12 @@ function saveItem() {
         name: document.getElementById('edit-name').value,
         desc: document.getElementById('edit-desc').value,
         price: Number(document.getElementById('edit-price').value),
-        img: document.getElementById('edit-img').value, // Save Image URL
-        options: null 
+        img: document.getElementById('edit-img').value
     };
+    // Only set options to null for new items to preserve existing options on edits
+    if (!id) {
+        itemData.options = null;
+    }
 
     const action = id 
         ? db.collection('menu').doc(id).update(itemData)
@@ -420,13 +421,12 @@ function saveItem() {
 
     action.then(() => {
         document.getElementById('item-modal').classList.remove('open');
-        // Refresh from DB
-        loadFromDatabase();
+        loadFromDatabase(); // Force Refresh
     }).catch(e => alert(e.message));
 }
 
 function deleteItem(id) {
-    if(confirm("¿Eliminar este platillo?") && db) {
+    if(confirm("¿Eliminar?") && db) {
         db.collection('menu').doc(id).delete().then(() => loadFromDatabase());
     }
 }
