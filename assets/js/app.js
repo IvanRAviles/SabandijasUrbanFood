@@ -1,10 +1,4 @@
-/* 
-   --------------------------------------------------
-   FIREBASE CONFIGURATION
-   Paste your Firebase Project keys here to enable 
-   Admin features permanently.
-   --------------------------------------------------
-*/
+/* --- FIREBASE CONFIGURATION --- */
 const firebaseConfig = {
   apiKey: "AIzaSyDAtElJUPzlT2rsKzQOC_e4mtQN9EgL_TY",
   authDomain: "sabandijasurbanfood-aa0f2.firebaseapp.com",
@@ -14,57 +8,104 @@ const firebaseConfig = {
   appId: "1:976944413697:web:5d23af6d6dcb376d1bd400"
 };
 
-/* --- VARIABLES --- */
 let db, auth;
-let MENU_DATA = []; // Will hold the menu items
+let MENU_DATA = []; 
 let CART = [];
 let isAdmin = false;
 
-/* --- INITIALIZATION --- */
+/* --- INIT --- */
 document.addEventListener("DOMContentLoaded", () => {
     initFirebase();
-    renderGallery(); // Load 1.jpeg - 15.jpeg
-    loadMenu();      // Load items
+    renderGallery(); // Loads 1.jpeg - 15.jpeg
+    loadMenu();      // Loads data
 });
 
 function initFirebase() {
     try {
-        if(firebase.apps.length === 0) {
+        if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
             firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+            
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    console.log("Admin Logged In");
+                    isAdmin = true;
+                    document.getElementById('admin-login-btn').style.display = 'none';
+                    document.getElementById('admin-add-btn').classList.add('visible');
+                    // If DB loads successfully, buttons will appear
+                    renderMenu(); 
+                }
+            });
         }
-        db = firebase.firestore();
-        auth = firebase.auth();
-        
-        // Listen for Login State
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                console.log("Admin Logged In");
-                isAdmin = true;
-                document.getElementById('admin-login-btn').style.display = 'none';
-                document.getElementById('admin-add-btn').classList.add('visible');
-                renderMenu(); // Re-render to show edit/delete buttons
-            }
-        });
     } catch (e) {
-        console.warn("Firebase not configured. Using local JSON mode.");
+        console.warn("Firebase failed to load (likely blocked by browser). Admin features disabled.");
     }
 }
 
-/* --- GALLERY RENDERER --- */
+/* --- LOAD MENU (Local First Strategy) --- */
+async function loadMenu() {
+    // STEP 1: Always load local JSON first (AdBlock Proof)
+    try {
+        const response = await fetch('assets/data/menu.json');
+        const json = await response.json();
+        
+        // Transform JSON to Flat Array
+        const localItems = [];
+        if(json.sections) {
+            json.sections.forEach(sec => {
+                sec.items.forEach(item => {
+                    localItems.push({
+                        id: item.id,
+                        section: sec.id,
+                        name: item.name,
+                        desc: item.desc || "",
+                        price: item.price,
+                        options: item.options || null
+                    });
+                });
+            });
+        }
+        
+        // Render Immediately
+        MENU_DATA = localItems;
+        renderMenu(); 
+        
+    } catch (error) {
+        console.error("Critical: Failed to load local menu.json", error);
+        document.getElementById('menu-list').innerHTML = "<p style='text-align:center; padding:20px'>Error cargando menú.</p>";
+    }
+
+    // STEP 2: Try to upgrade to Live Database
+    if (db) {
+        try {
+            const snapshot = await db.collection('menu').get();
+            if (!snapshot.empty) {
+                // If successful, overwrite local data with live data
+                MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMenu(); 
+                console.log("Menu upgraded to Live Database version");
+            }
+        } catch (e) {
+            console.log("Database blocked or offline. Staying on Local JSON.");
+        }
+    }
+}
+
+/* --- RENDER FUNCTIONS --- */
 function renderGallery() {
     const wrapper = document.getElementById('gallery-wrapper');
     wrapper.innerHTML = '';
     
-    // Loop for 1.jpeg to 15.jpeg
+    // Loop 1 to 15
     for (let i = 1; i <= 15; i++) {
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
-        // Visual reference images
+        // Using 'onerror' to hide images that might not exist yet
         slide.innerHTML = `<img src="assets/images/${i}.jpeg" onclick="openLightbox(this.src)" onerror="this.style.display='none'">`;
         wrapper.appendChild(slide);
     }
 
-    // Initialize Swiper
     new Swiper(".mySwiper", {
         slidesPerView: 1.2,
         centeredSlides: true,
@@ -72,61 +113,15 @@ function renderGallery() {
         loop: true,
         autoplay: { delay: 3000 },
         pagination: { el: ".swiper-pagination", clickable: true },
-        breakpoints: {
-            768: { slidesPerView: 3, spaceBetween: 20 }
-        }
+        breakpoints: { 768: { slidesPerView: 3, spaceBetween: 20 } }
     });
 }
 
-/* --- MENU DATA LOADING --- */
-async function loadMenu() {
-    // 1. Try Firestore first if available
-    if (db) {
-        try {
-            const snapshot = await db.collection('menu').get();
-            if (!snapshot.empty) {
-                MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderMenu();
-                return;
-            }
-        } catch (e) {
-            console.log("Firestore empty or error, falling back to local JSON.");
-        }
-    }
-
-    // 2. Fallback to local JSON (Initial Data)
-    try {
-        const response = await fetch('assets/data/menu.json');
-        const json = await response.json();
-        
-        // Flatten JSON structure to simple array for easier Firestore compatibility later
-        MENU_DATA = [];
-        json.sections.forEach(sec => {
-            sec.items.forEach(item => {
-                MENU_DATA.push({
-                    id: item.id,
-                    section: sec.id, // e.g., 'burros'
-                    sectionTitle: sec.title,
-                    name: item.name,
-                    desc: item.desc || "",
-                    price: item.price,
-                    options: item.options || null
-                });
-            });
-        });
-        renderMenu();
-    } catch (error) {
-        console.error("Error loading menu:", error);
-    }
-}
-
-/* --- RENDER MENU --- */
 function renderMenu() {
     const container = document.getElementById('menu-list');
     container.innerHTML = '';
 
-    // Group items by section
-    const sections = {
+    const sectionMap = {
         entradas: "Entradas",
         burros: "Burros",
         hamburguesas: "Hamburguesas",
@@ -138,14 +133,11 @@ function renderMenu() {
         extras: "Extras"
     };
 
-    // Iterate through defined sections order
-    Object.keys(sections).forEach(key => {
-        // Filter items for this section
+    Object.keys(sectionMap).forEach(key => {
         const items = MENU_DATA.filter(i => i.section === key);
-        
         if (items.length > 0) {
             const secDiv = document.createElement('div');
-            secDiv.innerHTML = `<h3 class="section-title">${sections[key]}</h3><div class="menu-grid"></div>`;
+            secDiv.innerHTML = `<h3 class="section-title">${sectionMap[key]}</h3><div class="menu-grid"></div>`;
             container.appendChild(secDiv);
             
             const grid = secDiv.querySelector('.menu-grid');
@@ -154,18 +146,15 @@ function renderMenu() {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
-                // Admin Buttons
                 let adminHtml = '';
                 if (isAdmin) {
                     adminHtml = `
                         <div class="admin-controls">
                             <button class="btn-edit" onclick="openEditModal('${item.id}')">Editar</button>
                             <button class="btn-delete" onclick="deleteItem('${item.id}')">Borrar</button>
-                        </div>
-                    `;
+                        </div>`;
                 }
 
-                // Options Select
                 let selectHtml = '';
                 if(item.options && item.options.length > 0) {
                     selectHtml = `<select class="modern-select" id="opt-${item.id}">`;
@@ -200,12 +189,11 @@ function addToCart(itemId) {
     let finalPrice = item.price;
     let variant = "";
     
-    // Check for options
     const select = document.getElementById(`opt-${itemId}`);
     if(select) {
         const idx = select.value;
         if(item.options[idx]) {
-            variant = item.options[idx].name;
+            variant = `(${item.options[idx].name})`;
             finalPrice += (item.options[idx].price || 0);
         }
     }
@@ -242,17 +230,17 @@ function openCart() {
     
     if(CART.length === 0) {
         list.innerHTML = "<p class='empty-msg'>Nada por aquí...</p>";
-        document.getElementById('modal-total').innerText = "$0";
+        totalEl.innerText = "$0";
     } else {
         CART.forEach(item => {
             const row = document.createElement('div');
             row.className = 'cart-item-row';
             row.innerHTML = `
-                <div>
-                    <div>${item.name} <small>${item.variant}</small></div>
-                    <button class="delete-btn" onclick="removeFromCart(${item.cartId})">Eliminar</button>
+                <div>${item.name} <small>${item.variant}</small></div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <div style="font-weight:bold;">$${item.price}</div>
+                    <button class="delete-btn" onclick="removeFromCart(${item.cartId})"><i class="fas fa-trash"></i></button>
                 </div>
-                <div>$${item.price}</div>
             `;
             list.appendChild(row);
         });
@@ -274,13 +262,14 @@ function closeCart() { document.getElementById('cart-modal').classList.remove('o
 
 function sendOrder() {
     if(CART.length === 0) return;
-    let msg = "¡Hola Sabandijas! Quiero pedir:%0A";
+    let msg = "¡Hola Sabandijas! Quiero pedir:%0A%0A";
     CART.forEach(i => {
         msg += `- ${i.name} ${i.variant} ($${i.price})%0A`;
     });
     const total = CART.reduce((sum, i) => sum + i.price, 0);
-    msg += `%0A*Total: $${total}*`;
+    msg += `%0A*TOTAL: $${total}*`;
     
+    // Change number here if needed
     window.open(`https://wa.me/5216868798922?text=${msg}`, '_blank');
 }
 
@@ -290,17 +279,14 @@ function loginAdmin() {
     const p = document.getElementById('admin-pass').value;
     if(auth) {
         auth.signInWithEmailAndPassword(e, p)
-            .then(() => {
-                document.getElementById('login-modal').classList.remove('open');
-            })
+            .then(() => document.getElementById('login-modal').classList.remove('open'))
             .catch(err => alert("Error: " + err.message));
     } else {
-        alert("Firebase no configurado.");
+        alert("Firebase no está conectado o fue bloqueado.");
     }
 }
 
 function openAdminModal() {
-    // Clear fields for new item
     document.getElementById('edit-id').value = '';
     document.getElementById('edit-name').value = '';
     document.getElementById('edit-desc').value = '';
@@ -329,27 +315,22 @@ function saveItem() {
         name: document.getElementById('edit-name').value,
         desc: document.getElementById('edit-desc').value,
         price: Number(document.getElementById('edit-price').value),
-        options: null // Simplified for admin UI stability
+        options: null
     };
 
     if(!db) {
-        alert("Modo Demo: No se guardará en base de datos sin Firebase.");
+        alert("Error: No se puede guardar porque la base de datos está bloqueada por el navegador.");
         return;
     }
 
-    if(id) {
-        // Edit existing
-        db.collection('menu').doc(id).update(itemData).then(() => {
-            document.getElementById('item-modal').classList.remove('open');
-            loadMenu(); // Refresh
-        });
-    } else {
-        // Add new
-        db.collection('menu').add(itemData).then(() => {
-            document.getElementById('item-modal').classList.remove('open');
-            loadMenu(); // Refresh
-        });
-    }
+    const promise = id 
+        ? db.collection('menu').doc(id).update(itemData)
+        : db.collection('menu').add(itemData);
+
+    promise.then(() => {
+        document.getElementById('item-modal').classList.remove('open');
+        loadMenu(); 
+    }).catch(e => alert("Error al guardar: " + e.message));
 }
 
 function deleteItem(id) {
