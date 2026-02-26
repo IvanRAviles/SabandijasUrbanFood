@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sabandijas | Urban Food</title>
     
-    <!-- CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     
     <!-- Fonts & Icons -->
@@ -24,7 +23,6 @@
         <div class="header-content">
             <div class="brand-section">
                 <div class="logo-wrapper">
-                    <!-- Ensure logo.png is in assets/images/ -->
                     <img src="assets/images/logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
                 </div>
                 <div class="title-block">
@@ -50,22 +48,17 @@
     <!-- GALLERY -->
     <section class="gallery-section">
         <div class="swiper mySwiper">
-            <div class="swiper-wrapper" id="gallery-wrapper">
-                <!-- Images injected via JS -->
-            </div>
+            <div class="swiper-wrapper" id="gallery-wrapper"></div>
             <div class="swiper-pagination"></div>
         </div>
     </section>
 
-    <!-- MENU -->
+    <!-- MENU CONTAINER -->
     <main class="menu-container" id="menu-list">
-        <!-- If JS fails, this text remains. If JS works, this gets replaced instantly. -->
-        <div class="loading">
-            <i class="fas fa-circle-notch fa-spin"></i> Cargando menú...
-        </div>
+        <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> Cargando menú...</div>
     </main>
 
-    <!-- FLOATING CART -->
+    <!-- CART FLOATER -->
     <div class="cart-floater" id="cart-floater" onclick="openCart()">
         <div class="cart-left">
             <div class="icon-circle">
@@ -130,6 +123,7 @@
             </div>
             <div style="padding: 20px; overflow-y: auto;">
                 <input type="hidden" id="edit-id">
+                
                 <label class="input-label">Categoría</label>
                 <select id="edit-section" class="modern-input">
                     <option value="entradas">Entradas</option>
@@ -142,26 +136,32 @@
                     <option value="bebidas">Bebidas</option>
                     <option value="extras">Extras</option>
                 </select>
+
                 <label class="input-label">Nombre</label>
                 <input type="text" id="edit-name" class="modern-input">
+                
                 <label class="input-label">Descripción</label>
                 <textarea id="edit-desc" class="modern-input" rows="3"></textarea>
-                <label class="input-label">Precio</label>
+                
+                <label class="input-label">Precio ($)</label>
                 <input type="number" id="edit-price" class="modern-input">
+
+                <!-- NEW: Image URL Input -->
+                <label class="input-label">URL de Imagen</label>
+                <input type="text" id="edit-img" class="modern-input" placeholder="http://... o assets/images/foto.jpg">
+                
                 <button onclick="saveItem()" class="action-btn full-width">GUARDAR</button>
             </div>
         </div>
     </div>
 
-    <!-- FIREBASE (Deferred) -->
-    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    <!-- SWIPER JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    
-    <!-- MAIN APP JS -->
     <script src="assets/js/app.js"></script>
 </body>
 </html>
