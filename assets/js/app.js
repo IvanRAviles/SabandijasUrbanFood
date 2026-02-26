@@ -471,3 +471,40 @@ function openLightbox(src) {
 function closeLightbox() {
     document.getElementById('lightbox').classList.remove('active');
 }
+
+/* =========================================
+   NEW: EMERGENCY RESET FUNCTION
+   ========================================= */
+async function nukeDatabase() {
+    if(!db || !isAdmin) return;
+    
+    if(!confirm("⚠️ ¡PELIGRO! ⚠️\nEsto borrará TODOS los platillos de la base de datos.\n¿Estás seguro que quieres reiniciar el menú?")) return;
+
+    alert("Borrando base de datos... Esto puede tomar unos segundos.");
+    
+    try {
+        // Get all documents
+        const snapshot = await db.collection('menu').get();
+        if (snapshot.empty) {
+            alert("La base de datos ya está vacía.");
+            return;
+        }
+
+        // Delete them one by one
+        const batchSize = snapshot.size;
+        let deleted = 0;
+        
+        const deletePromises = snapshot.docs.map(doc => 
+            db.collection('menu').doc(doc.id).delete()
+        );
+
+        await Promise.all(deletePromises);
+        
+        alert("¡Base de datos limpia! Ahora puedes darle a 'Subir Menú Original' nuevamente.");
+        location.reload(); // Reload to show the Static Menu again
+
+    } catch (e) {
+        alert("Error al borrar: " + e.message);
+        console.error(e);
+    }
+}
