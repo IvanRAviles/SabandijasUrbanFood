@@ -1,4 +1,6 @@
 /* --- FIREBASE CONFIGURATION --- */
+// Paste your keys here if you want admin to work. 
+// If not, the site still works with the data file above.
 const firebaseConfig = {
   apiKey: "AIzaSyDAtElJUPzlT2rsKzQOC_e4mtQN9EgL_TY",
   authDomain: "sabandijasurbanfood-aa0f2.firebaseapp.com",
@@ -8,87 +10,66 @@ const firebaseConfig = {
   appId: "1:976944413697:web:5d23af6d6dcb376d1bd400"
 };
 
+/* --- VARIABLES --- */
 let db, auth;
-let MENU_DATA = []; 
+let MENU_DATA = [];
 let CART = [];
 let isAdmin = false;
 
-/* --- INIT --- */
+/* --- INITIALIZATION --- */
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Render Gallery (Images 1-15)
+    renderGallery();
+    
+    // 2. Load Local Data IMMEDIATELY (No fetch, no waiting)
+    if(typeof DEFAULT_MENU_DATA !== 'undefined') {
+        MENU_DATA = DEFAULT_MENU_DATA;
+        renderMenu(); // Shows menu instantly
+    } else {
+        console.error("Critical: menu-data.js not loaded.");
+    }
+
+    // 3. Try connecting to Firebase (Silently)
     initFirebase();
-    renderGallery(); // Loads 1.jpeg - 15.jpeg
-    loadMenu();      // Loads data
 });
 
 function initFirebase() {
     try {
+        // Check if Firebase script loaded (wasn't blocked by AdBlock)
         if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             auth = firebase.auth();
             
+            // Listener for Admin Login
             auth.onAuthStateChanged(user => {
                 if (user) {
                     console.log("Admin Logged In");
                     isAdmin = true;
                     document.getElementById('admin-login-btn').style.display = 'none';
                     document.getElementById('admin-add-btn').classList.add('visible');
-                    // If DB loads successfully, buttons will appear
-                    renderMenu(); 
+                    renderMenu(); // Re-render to show edit buttons
                 }
             });
+
+            // Try to sync with Database (Overwrites local data if successful)
+            loadFromDatabase();
         }
     } catch (e) {
-        console.warn("Firebase failed to load (likely blocked by browser). Admin features disabled.");
+        console.warn("Firebase blocked or failed. Running in static mode.");
     }
 }
 
-/* --- LOAD MENU (Local First Strategy) --- */
-async function loadMenu() {
-    // STEP 1: Always load local JSON first (AdBlock Proof)
+async function loadFromDatabase() {
     try {
-        const response = await fetch('assets/data/menu.json');
-        const json = await response.json();
-        
-        // Transform JSON to Flat Array
-        const localItems = [];
-        if(json.sections) {
-            json.sections.forEach(sec => {
-                sec.items.forEach(item => {
-                    localItems.push({
-                        id: item.id,
-                        section: sec.id,
-                        name: item.name,
-                        desc: item.desc || "",
-                        price: item.price,
-                        options: item.options || null
-                    });
-                });
-            });
+        const snapshot = await db.collection('menu').get();
+        if (!snapshot.empty) {
+            MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderMenu();
+            console.log("Updated with Live Database Data");
         }
-        
-        // Render Immediately
-        MENU_DATA = localItems;
-        renderMenu(); 
-        
-    } catch (error) {
-        console.error("Critical: Failed to load local menu.json", error);
-        document.getElementById('menu-list').innerHTML = "<p style='text-align:center; padding:20px'>Error cargando menú.</p>";
-    }
-
-    // STEP 2: Try to upgrade to Live Database
-    if (db) {
-        try {
-            const snapshot = await db.collection('menu').get();
-            if (!snapshot.empty) {
-                // If successful, overwrite local data with live data
-                MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderMenu(); 
-                console.log("Menu upgraded to Live Database version");
-            }
-        } catch (e) {
-            console.log("Database blocked or offline. Staying on Local JSON.");
-        }
+    } catch (e) {
+        console.log("Database offline or blocked.");
     }
 }
 
@@ -101,7 +82,7 @@ function renderGallery() {
     for (let i = 1; i <= 15; i++) {
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
-        // Using 'onerror' to hide images that might not exist yet
+        // onerror hides broken images automatically
         slide.innerHTML = `<img src="assets/images/${i}.jpeg" onclick="openLightbox(this.src)" onerror="this.style.display='none'">`;
         wrapper.appendChild(slide);
     }
@@ -170,7 +151,7 @@ function renderMenu() {
                         <span class="item-name">${item.name}</span>
                         <span class="item-price">$${item.price}</span>
                     </div>
-                    <p class="item-desc">${item.desc}</p>
+                    ${item.desc ? `<p class="item-desc">${item.desc}</p>` : ''}
                     ${selectHtml}
                     <button class="btn-add" onclick="addToCart('${item.id}')">Agregar</button>
                     ${adminHtml}
@@ -269,7 +250,7 @@ function sendOrder() {
     const total = CART.reduce((sum, i) => sum + i.price, 0);
     msg += `%0A*TOTAL: $${total}*`;
     
-    // Change number here if needed
+    // Change number here
     window.open(`https://wa.me/5216868798922?text=${msg}`, '_blank');
 }
 
@@ -282,7 +263,7 @@ function loginAdmin() {
             .then(() => document.getElementById('login-modal').classList.remove('open'))
             .catch(err => alert("Error: " + err.message));
     } else {
-        alert("Firebase no está conectado o fue bloqueado.");
+        alert("Firebase no está conectado (Bloqueado por navegador o no configurado).");
     }
 }
 
@@ -301,7 +282,7 @@ function openEditModal(id) {
         document.getElementById('edit-id').value = item.id;
         document.getElementById('edit-section').value = item.section;
         document.getElementById('edit-name').value = item.name;
-        document.getElementById('edit-desc').value = item.desc;
+        document.getElementById('edit-desc').value = item.desc || "";
         document.getElementById('edit-price').value = item.price;
         document.getElementById('modal-title').innerText = "Editar Platillo";
         document.getElementById('item-modal').classList.add('open');
@@ -319,7 +300,7 @@ function saveItem() {
     };
 
     if(!db) {
-        alert("Error: No se puede guardar porque la base de datos está bloqueada por el navegador.");
+        alert("Error: Base de datos no conectada.");
         return;
     }
 
@@ -329,13 +310,13 @@ function saveItem() {
 
     promise.then(() => {
         document.getElementById('item-modal').classList.remove('open');
-        loadMenu(); 
+        loadFromDatabase(); 
     }).catch(e => alert("Error al guardar: " + e.message));
 }
 
 function deleteItem(id) {
     if(confirm("¿Eliminar este platillo?") && db) {
-        db.collection('menu').doc(id).delete().then(() => loadMenu());
+        db.collection('menu').doc(id).delete().then(() => loadFromDatabase());
     }
 }
 
