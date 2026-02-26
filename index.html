@@ -1,3 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sabandijas | Urban Food</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="brand-section">
+                <div class="logo-wrapper">
+                    <img src="assets/images/logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+                </div>
+                <div class="title-block">
+                    <h1 class="main-title">SABANDIJAS</h1>
+                    <span class="sub-title">URBAN FOOD</span>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <a href="https://maps.google.com/?q=2538+Heroico+Militar" target="_blank" class="info-pill">
+                    <i class="fas fa-map-marker-alt"></i> 2538 Heroico Militar
+                </a>
+                <a href="tel:6868798922" class="info-pill">
+                    <i class="fas fa-phone"></i> 686 879 8922
+                </a>
+                <div class="time-pill">
+                    <i class="far fa-clock"></i> 7am - 12am (Cerrado Martes)
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- GALLERY SLIDER -->
+    <section class="gallery-section">
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper" id="gallery-wrapper"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <!-- MENU CONTAINER -->
+    <main class="menu-container" id="menu-list">
+        <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> Cargando menú...</div>
+    </main>
+
+    <!-- FLOATING CART -->
+    <div class="cart-floater" id="cart-floater" onclick="openCart()">
+        <div class="cart-left">
+            <div class="icon-circle">
+                <i class="fas fa-shopping-basket"></i>
+                <span class="count-badge" id="cart-count">0</span>
+            </div>
+            <span class="cart-label">Ver Pedido</span>
+        </div>
+        <span class="cart-total" id="cart-total">$0</span>
+    </div>
+
+    <!-- CART MODAL -->
+    <div class="modal-overlay" id="cart-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Tu Pedido</h2>
+                <button class="close-btn" onclick="closeCart()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="cart-items-list" id="cart-items">
+                <p class="empty-msg">Tu carrito está vacío.</p>
+            </div>
+            <div class="modal-footer">
+                <div class="total-row"><span>Total:</span><span id="modal-total">$0</span></div>
+                <button class="whatsapp-btn" onclick="sendOrder()">
+                    <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
+    </div>
+
+    <!-- ADMIN UI BUTTONS -->
+    <button id="admin-lock-btn" onclick="openLoginModal()"><i class="fas fa-lock"></i></button>
+    <div id="admin-add-btn" class="floating-add-btn" onclick="openEditModal()"><i class="fas fa-plus"></i></div>
+
 <!-- LOGIN / ADMIN DASHBOARD MODAL -->
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content small-modal">
@@ -34,3 +136,54 @@
             </div>
         </div>
     </div>
+
+    <!-- EDIT/ADD ITEM MODAL -->
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Editar Platillo</h2>
+                <button class="close-btn" onclick="document.getElementById('item-modal').classList.remove('open')">&times;</button>
+            </div>
+            <div style="padding: 20px; overflow-y: auto;">
+                <input type="hidden" id="edit-id">
+                
+                <label class="input-label">Categoría</label>
+                <select id="edit-section" class="modern-input">
+                    <option value="entradas">Entradas</option>
+                    <option value="burros">Burros</option>
+                    <option value="hamburguesas">Hamburguesas</option>
+                    <option value="hotdogs">Hot Dogs</option>
+                    <option value="boneless">Boneless</option>
+                    <option value="alitas">Alitas</option>
+                    <option value="desayunos">Desayunos</option>
+                    <option value="bebidas">Bebidas</option>
+                    <option value="extras">Extras</option>
+                </select>
+
+                <label class="input-label">Nombre del Platillo</label>
+                <input type="text" id="edit-name" class="modern-input">
+                
+                <label class="input-label">Descripción</label>
+                <textarea id="edit-desc" class="modern-input" rows="3"></textarea>
+                
+                <label class="input-label">Precio ($)</label>
+                <input type="number" id="edit-price" class="modern-input">
+
+                <label class="input-label">URL de Imagen (Opcional)</label>
+                <input type="text" id="edit-img" class="modern-input" placeholder="Ej: assets/images/foto.jpg o https://...">
+                
+                <button onclick="saveItem()" class="action-btn full-width">GUARDAR CAMBIOS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script defer src="assets/js/app.js"></script>
+</body>
+</html>
