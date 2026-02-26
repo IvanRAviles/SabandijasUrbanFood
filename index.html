@@ -4,31 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sabandijas | Urban Food</title>
-    <meta name="description" content="Sabandijas Urban Food - Menú Digital">
     
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     
-    <!-- Fonts -->
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
-    
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- HEADER -->
     <header class="main-header">
         <div class="header-content">
             <div class="brand-section">
-                <!-- Ensure logo.png exists in assets/images/ -->
                 <div class="logo-wrapper">
-                    <img src="assets/images/logo.png" alt="Logo Sabandijas" class="logo-img" onerror="this.style.display='none'">
+                    <!-- Ensure logo.png is in assets/images/ -->
+                    <img src="assets/images/logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
                 </div>
                 <div class="title-block">
                     <h1 class="main-title">SABANDIJAS</h1>
@@ -37,7 +34,7 @@
             </div>
             
             <div class="info-section">
-                <a href="https://maps.google.com/?q=2538+Heroico+Militar,+Mexicali" target="_blank" class="info-pill">
+                <a href="https://maps.google.com/?q=2538+Heroico+Militar" target="_blank" class="info-pill">
                     <i class="fas fa-map-marker-alt"></i> 2538 Heroico Militar
                 </a>
                 <a href="tel:6868798922" class="info-pill">
@@ -50,24 +47,25 @@
         </div>
     </header>
 
-    <!-- Gallery Slider -->
+    <!-- GALLERY -->
     <section class="gallery-section">
         <div class="swiper mySwiper">
             <div class="swiper-wrapper" id="gallery-wrapper">
-                <!-- JS will inject images -->
+                <!-- Images injected via JS -->
             </div>
             <div class="swiper-pagination"></div>
         </div>
     </section>
 
-    <!-- Menu Container -->
+    <!-- MENU -->
     <main class="menu-container" id="menu-list">
+        <!-- If JS fails, this text remains. If JS works, this gets replaced instantly. -->
         <div class="loading">
             <i class="fas fa-circle-notch fa-spin"></i> Cargando menú...
         </div>
     </main>
 
-    <!-- Cart Button -->
+    <!-- FLOATING CART -->
     <div class="cart-floater" id="cart-floater" onclick="openCart()">
         <div class="cart-left">
             <div class="icon-circle">
@@ -79,7 +77,7 @@
         <span class="cart-total" id="cart-total">$0</span>
     </div>
 
-    <!-- Cart Modal -->
+    <!-- CART MODAL -->
     <div class="modal-overlay" id="cart-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -92,32 +90,28 @@
             <div class="modal-footer">
                 <div class="total-row"><span>Total:</span><span id="modal-total">$0</span></div>
                 <button class="whatsapp-btn" onclick="sendOrder()">
-                    <i class="fab fa-whatsapp"></i> ENVIAR A WHATSAPP
+                    <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Lightbox -->
+    <!-- LIGHTBOX -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
         <span class="lightbox-close">&times;</span>
         <img class="lightbox-content" id="lightbox-img">
     </div>
 
-    <!-- ADMIN BUTTONS -->
-    <button id="admin-login-btn" onclick="document.getElementById('login-modal').classList.add('open')">
-        <i class="fas fa-lock"></i>
-    </button>
-    <div id="admin-add-btn" class="floating-add-btn" onclick="openAdminModal()">
-        <i class="fas fa-plus"></i>
-    </div>
+    <!-- ADMIN UI -->
+    <button id="admin-login-btn" onclick="openLoginModal()"><i class="fas fa-lock"></i></button>
+    <div id="admin-add-btn" class="floating-add-btn" onclick="openAdminModal()"><i class="fas fa-plus"></i></div>
 
-    <!-- Login Modal -->
+    <!-- LOGIN MODAL -->
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content small-modal">
             <div class="modal-header">
                 <h2>Admin</h2>
-                <button class="close-btn" onclick="document.getElementById('login-modal').classList.remove('open')">&times;</button>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
             </div>
             <div style="padding: 20px;">
                 <input type="email" id="admin-email" placeholder="Email" class="modern-input">
@@ -127,7 +121,7 @@
         </div>
     </div>
 
-    <!-- Add/Edit Item Modal -->
+    <!-- EDIT ITEM MODAL -->
     <div class="modal-overlay" id="item-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -135,8 +129,7 @@
                 <button class="close-btn" onclick="document.getElementById('item-modal').classList.remove('open')">&times;</button>
             </div>
             <div style="padding: 20px; overflow-y: auto;">
-                <input type="hidden" id="edit-id"> 
-                
+                <input type="hidden" id="edit-id">
                 <label class="input-label">Categoría</label>
                 <select id="edit-section" class="modern-input">
                     <option value="entradas">Entradas</option>
@@ -149,31 +142,26 @@
                     <option value="bebidas">Bebidas</option>
                     <option value="extras">Extras</option>
                 </select>
-
-                <label class="input-label">Nombre del Platillo</label>
+                <label class="input-label">Nombre</label>
                 <input type="text" id="edit-name" class="modern-input">
-                
                 <label class="input-label">Descripción</label>
                 <textarea id="edit-desc" class="modern-input" rows="3"></textarea>
-
-                <label class="input-label">Precio ($)</label>
+                <label class="input-label">Precio</label>
                 <input type="number" id="edit-price" class="modern-input">
-                
-                <button onclick="saveItem()" class="action-btn full-width">GUARDAR CAMBIOS</button>
+                <button onclick="saveItem()" class="action-btn full-width">GUARDAR</button>
             </div>
         </div>
     </div>
 
-    <!-- 1. Menu Data (Must load before app.js) -->
-    <script src="assets/js/menu-data.js"></script>
-
-    <!-- 2. Firebase SDKs (Defer to ensure no blocking) -->
+    <!-- FIREBASE (Deferred) -->
     <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    <!-- 3. UI and Logic -->
+    <!-- SWIPER JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <script defer src="assets/js/app.js"></script>
+    
+    <!-- MAIN APP JS -->
+    <script src="assets/js/app.js"></script>
 </body>
 </html>
