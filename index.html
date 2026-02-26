@@ -22,13 +22,13 @@
 </head>
 <body>
 
-    <!-- Header (Static position) -->
+    <!-- Header -->
     <header class="main-header">
         <div class="header-content">
             <div class="brand-section">
-                <!-- Ensure you have a logo.png in assets/images/ -->
+                <!-- Ensure logo.png exists in assets/images/ -->
                 <div class="logo-wrapper">
-                    <img src="assets/images/logo.png" alt="Logo Sabandijas" class="logo-img" onerror="this.src='https://via.placeholder.com/100x100?text=S'">
+                    <img src="assets/images/logo.png" alt="Logo Sabandijas" class="logo-img" onerror="this.style.display='none'">
                 </div>
                 <div class="title-block">
                     <h1 class="main-title">SABANDIJAS</h1>
@@ -50,11 +50,11 @@
         </div>
     </header>
 
-    <!-- Gallery Slider (Loads 1.jpeg - 15.jpeg) -->
+    <!-- Gallery Slider -->
     <section class="gallery-section">
         <div class="swiper mySwiper">
             <div class="swiper-wrapper" id="gallery-wrapper">
-                <!-- JS injects images here -->
+                <!-- JS will inject images 1.jpeg through 15.jpeg here -->
             </div>
             <div class="swiper-pagination"></div>
         </div>
@@ -98,7 +98,7 @@
         </div>
     </div>
 
-    <!-- Lightbox for Images -->
+    <!-- Lightbox -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
         <span class="lightbox-close">&times;</span>
         <img class="lightbox-content" id="lightbox-img">
@@ -135,7 +135,7 @@
                 <button class="close-btn" onclick="document.getElementById('item-modal').classList.remove('open')">&times;</button>
             </div>
             <div style="padding: 20px; overflow-y: auto;">
-                <input type="hidden" id="edit-id"> <!-- Stores Firestore ID -->
+                <input type="hidden" id="edit-id"> 
                 
                 <label class="input-label">Categoría</label>
                 <select id="edit-section" class="modern-input">
@@ -169,9 +169,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    <!-- Swiper JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <!-- Main Logic -->
     <script src="assets/js/app.js"></script>
 </body>
 </html>
