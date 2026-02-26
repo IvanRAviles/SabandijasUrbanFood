@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sabandijas | Urban Food</title>
-    <meta name="description" content="Sabandijas Urban Food - Menú Digital">
     
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
@@ -20,12 +19,12 @@
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- HEADER -->
     <header class="main-header">
         <div class="header-content">
             <div class="brand-section">
                 <div class="logo-wrapper">
-                    <!-- Ensure you have a file named logo.png in assets/images/ -->
+                    <!-- Ensure logo.png is in assets/images/ -->
                     <img src="assets/images/logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
                 </div>
                 <div class="title-block">
@@ -35,7 +34,7 @@
             </div>
             
             <div class="info-section">
-                <a href="https://maps.google.com/?q=2538+Heroico+Militar" target="_blank" class="info-pill">
+                <a href="https://maps.google.com/?q=2538+Heroico+Militar" target="_blank" rel="noopener" class="info-pill">
                     <i class="fas fa-map-marker-alt"></i> 2538 Heroico Militar
                 </a>
                 <a href="tel:6868798922" class="info-pill">
@@ -48,7 +47,7 @@
         </div>
     </header>
 
-    <!-- Gallery Slider -->
+    <!-- GALLERY SLIDER -->
     <section class="gallery-section">
         <div class="swiper mySwiper">
             <div class="swiper-wrapper" id="gallery-wrapper">
@@ -60,7 +59,9 @@
 
     <!-- MENU CONTAINER -->
     <main class="menu-container" id="menu-list">
-        <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> Cargando menú...</div>
+        <div class="loading">
+            <i class="fas fa-circle-notch fa-spin"></i> Cargando menú...
+        </div>
     </main>
 
     <!-- FLOATING CART -->
@@ -104,31 +105,33 @@
     <button id="admin-lock-btn" onclick="openLoginModal()"><i class="fas fa-lock"></i></button>
     <div id="admin-add-btn" class="floating-add-btn" onclick="openEditModal()"><i class="fas fa-plus"></i></div>
 
-    <!-- LOGIN / ADMIN DASHBOARD MODAL -->
+    <!-- LOGIN / LOGOUT MODAL -->
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content small-modal">
             <div class="modal-header">
-                <h2 id="login-title">Acceso Admin</h2>
-                <button class="close-btn" onclick="document.getElementById('login-modal').classList.remove('open')">&times;</button>
+                <h2>Admin</h2>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
             </div>
-            <div style="padding: 20px;" id="login-form-container">
-                <!-- Login Form -->
-                <div id="login-view">
+            <div style="padding: 20px;">
+                
+                <!-- View 1: Not Logged In -->
+                <div id="view-login-form">
                     <input type="email" id="admin-email" placeholder="Email" class="modern-input">
                     <input type="password" id="admin-pass" placeholder="Password" class="modern-input">
                     <button onclick="loginAdmin()" class="action-btn full-width">ENTRAR</button>
                 </div>
-                
-                <!-- Logout View (Hidden by default) -->
-                <div id="logout-view" style="display:none; text-align:center;">
-                    <p style="margin-bottom:20px; color:#fff;">Has iniciado sesión correctamente.</p>
-                    <button onclick="logoutAdmin()" class="action-btn full-width" style="background:#ff4444;">CERRAR SESIÓN</button>
+
+                <!-- View 2: Already Logged In -->
+                <div id="view-logout-form" style="display:none; text-align:center;">
+                    <p style="color:#fff; margin-bottom:15px;">Has iniciado sesión como Admin.</p>
+                    <button onclick="logoutAdmin()" class="action-btn full-width" style="background-color: #ff4444;">CERRAR SESIÓN</button>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- EDIT ITEM MODAL -->
+    <!-- EDIT/ADD ITEM MODAL -->
     <div class="modal-overlay" id="item-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -160,8 +163,8 @@
                 <label class="input-label">Precio ($)</label>
                 <input type="number" id="edit-price" class="modern-input">
 
-                <label class="input-label">URL de Imagen (Opcional)</label>
-                <input type="text" id="edit-img" class="modern-input" placeholder="https://... o assets/images/foto.jpg">
+                <label class="input-label">Link de la Foto (Opcional)</label>
+                <input type="text" id="edit-img" class="modern-input" placeholder="Ej: assets/images/foto.jpg o https://...">
                 
                 <button onclick="saveItem()" class="action-btn full-width">GUARDAR CAMBIOS</button>
             </div>
