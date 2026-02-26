@@ -1,9 +1,9 @@
 /* =========================================
-   1. STATIC MENU DATA (The "Backup")
-   This ensures the menu ALWAYS loads.
+   1. STATIC MENU DATA (BACKUP)
+   This data is embedded so it loads INSTANTLY.
    ========================================= */
 const STATIC_MENU = [
-    { id: "e1", section: "entradas", name: "DEDOS DE QUESO", desc: "5 pz empanizados en panko con salsa de tomate.", price: 100 },
+    { id: "e1", section: "entradas", name: "DEDOS DE QUESO", desc: "5 pz empanizados en panko con salsa de tomate.", price: 100, img: "assets/images/dedos_queso.jpg" },
     { id: "e2", section: "entradas", name: "DEDOS SABANDIJAS", desc: "6 pz empanizados en Flaming Hot + papas fritas.", price: 120 },
     { id: "e3", section: "entradas", name: "CHILIPOPPERS", desc: "4 chiles rellenos de 3 quesos y tocino.", price: 120 },
     
@@ -63,7 +63,7 @@ const STATIC_MENU = [
 ];
 
 /* =========================================
-   2. APP STATE & CONFIG
+   2. CONFIGURATION
    ========================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyDAtElJUPzlT2rsKzQOC_e4mtQN9EgL_TY",
@@ -74,31 +74,31 @@ const firebaseConfig = {
   appId: "1:976944413697:web:5d23af6d6dcb376d1bd400"
 };
 
-let MENU_DATA = [...STATIC_MENU]; // Start with static data
-let CART = [];
 let db, auth;
+let MENU_DATA = [...STATIC_MENU]; 
+let CART = [];
 let isAdmin = false;
 
 /* =========================================
-   3. INITIALIZATION
+   3. INIT
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-    // A. Render immediately using static data
+    // 1. Show the static menu immediately (Fast & Safe)
     renderMenu();
-    try { renderGallery(); } catch(e) { console.warn("Gallery error", e); }
+    try { renderGallery(); } catch(e) {}
 
-    // B. Attempt Firebase Connection (Async)
-    setTimeout(initFirebase, 500); 
+    // 2. Try to connect to Firebase in the background
+    initFirebase();
 });
 
 /* =========================================
-   4. MENU RENDERING (The Critical Part)
+   4. CORE FUNCTIONS
    ========================================= */
 function renderMenu() {
     const container = document.getElementById('menu-list');
     if(!container) return;
     
-    container.innerHTML = ''; // Clear "Loading..."
+    container.innerHTML = ''; // Clear loading
 
     const sectionMap = {
         entradas: "Entradas",
@@ -125,7 +125,7 @@ function renderMenu() {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
-                // Admin Buttons (Only if logged in)
+                // Admin Buttons
                 let adminHtml = '';
                 if (isAdmin) {
                     adminHtml = `
@@ -135,7 +135,7 @@ function renderMenu() {
                         </div>`;
                 }
 
-                // Options Dropdown
+                // Options
                 let selectHtml = '';
                 if(item.options && item.options.length > 0) {
                     selectHtml = `<select class="modern-select" id="opt-${item.id}">`;
@@ -146,7 +146,16 @@ function renderMenu() {
                     selectHtml += `</select>`;
                 }
 
+                // Image Logic
+                let imgHtml = '';
+                if(item.img) {
+                    imgHtml = `<div style="height:180px; overflow:hidden; border-radius:12px 12px 0 0; margin:-15px -15px 10px -15px;">
+                        <img src="${item.img}" style="width:100%; height:100%; object-fit:cover;" onclick="openLightbox('${item.img}')" onerror="this.style.display='none'">
+                    </div>`;
+                }
+
                 card.innerHTML = `
+                    ${imgHtml}
                     <div class="item-header">
                         <span class="item-name">${item.name}</span>
                         <span class="item-price">$${item.price}</span>
@@ -170,7 +179,6 @@ function renderGallery() {
     for (let i = 1; i <= 15; i++) {
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
-        // 'onerror' hides image if 1.jpeg doesn't exist yet
         slide.innerHTML = `<img src="assets/images/${i}.jpeg" onclick="openLightbox(this.src)" onerror="this.parentElement.style.display='none'">`;
         wrapper.appendChild(slide);
     }
@@ -277,7 +285,6 @@ function sendOrder() {
     });
     const total = CART.reduce((sum, i) => sum + i.price, 0);
     msg += `%0A*TOTAL: $${total}*`;
-    
     window.open(`https://wa.me/5216868798922?text=${msg}`, '_blank');
 }
 
@@ -285,14 +292,12 @@ function sendOrder() {
    6. ADMIN & FIREBASE
    ========================================= */
 function initFirebase() {
-    // Only attempt if scripts loaded
     if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             auth = firebase.auth();
             
-            // Login Listener
             auth.onAuthStateChanged(user => {
                 if (user) {
                     isAdmin = true;
@@ -302,15 +307,14 @@ function initFirebase() {
                 }
             });
 
-            // Database Sync
+            // Load data from DB (Overwrite static)
             db.collection('menu').get().then(snapshot => {
                 if (!snapshot.empty) {
                     MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderMenu();
                     console.log("Database Loaded");
                 }
-            }).catch(e => console.log("Using static data (DB offline)"));
-
+            });
         } catch (e) { console.log("Firebase not configured"); }
     }
 }
@@ -323,12 +327,12 @@ function loginAdmin() {
             .then(() => closeLoginModal())
             .catch(err => alert("Error: " + err.message));
     } else {
-        alert("Firebase no está conectado.");
+        alert("Firebase no conectado.");
     }
 }
 
 function saveItem() {
-    if(!db) { alert("Base de datos no disponible."); return; }
+    if(!db) { alert("Error: No hay conexión a base de datos."); return; }
     
     const id = document.getElementById('edit-id').value;
     const itemData = {
@@ -336,7 +340,8 @@ function saveItem() {
         name: document.getElementById('edit-name').value,
         desc: document.getElementById('edit-desc').value,
         price: Number(document.getElementById('edit-price').value),
-        options: null // Simplified for basic editing
+        img: document.getElementById('edit-img').value, // SAVES THE IMAGE URL
+        options: null
     };
 
     const action = id 
@@ -345,7 +350,6 @@ function saveItem() {
 
     action.then(() => {
         document.getElementById('item-modal').classList.remove('open');
-        // Refresh data
         db.collection('menu').get().then(snapshot => {
             MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderMenu();
@@ -371,6 +375,7 @@ function openAdminModal() {
     document.getElementById('edit-name').value = '';
     document.getElementById('edit-desc').value = '';
     document.getElementById('edit-price').value = '';
+    document.getElementById('edit-img').value = '';
     document.getElementById('modal-title').innerText = "Nuevo Platillo";
     document.getElementById('item-modal').classList.add('open');
 }
@@ -383,14 +388,12 @@ function openEditModal(id) {
         document.getElementById('edit-name').value = item.name;
         document.getElementById('edit-desc').value = item.desc || "";
         document.getElementById('edit-price').value = item.price;
+        document.getElementById('edit-img').value = item.img || "";
         document.getElementById('modal-title').innerText = "Editar Platillo";
         document.getElementById('item-modal').classList.add('open');
     }
 }
 
-/* =========================================
-   7. UTILS
-   ========================================= */
 function openLightbox(src) {
     document.getElementById('lightbox-img').src = src;
     document.getElementById('lightbox').classList.add('active');
