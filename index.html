@@ -54,7 +54,7 @@
     <section class="gallery-section">
         <div class="swiper mySwiper">
             <div class="swiper-wrapper" id="gallery-wrapper">
-                <!-- JS will inject images 1.jpeg through 15.jpeg here -->
+                <!-- JS will inject images -->
             </div>
             <div class="swiper-pagination"></div>
         </div>
@@ -164,13 +164,16 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- 1. Menu Data (Must load before app.js) -->
+    <script src="assets/js/menu-data.js"></script>
 
-    <!-- Scripts -->
+    <!-- 2. Firebase SDKs (Defer to ensure no blocking) -->
+    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <!-- 3. UI and Logic -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script defer src="assets/js/app.js"></script>
 </body>
 </html>
