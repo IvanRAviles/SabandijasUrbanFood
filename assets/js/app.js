@@ -1,6 +1,70 @@
-/* --- FIREBASE CONFIGURATION --- */
-// Paste your keys here if you want admin to work. 
-// If not, the site still works with the data file above.
+/* =========================================
+   1. STATIC MENU DATA (The "Backup")
+   This ensures the menu ALWAYS loads.
+   ========================================= */
+const STATIC_MENU = [
+    { id: "e1", section: "entradas", name: "DEDOS DE QUESO", desc: "5 pz empanizados en panko con salsa de tomate.", price: 100 },
+    { id: "e2", section: "entradas", name: "DEDOS SABANDIJAS", desc: "6 pz empanizados en Flaming Hot + papas fritas.", price: 120 },
+    { id: "e3", section: "entradas", name: "CHILIPOPPERS", desc: "4 chiles rellenos de 3 quesos y tocino.", price: 120 },
+    
+    { id: "b1", section: "burros", name: "BURRO EL IGUANO", desc: "Carne asada, guacamole, tocino y queso.", price: 175 },
+    { id: "b2", section: "burros", name: "BURRO EL BUFALO", desc: "Boneless bufalo, tocino y queso monterrey.", price: 150 },
+    
+    { id: "h1", section: "hamburguesas", name: "BEEF BURGER", desc: "Carne, vegetales, queso americano + papas.", price: 140 },
+    { id: "h2", section: "hamburguesas", name: "CHEESE BURGER", desc: "Quesos, champiñón, tocino, aderezo + papas.", price: 160 },
+    { id: "h3", section: "hamburguesas", name: "DOUBLE BEEF", desc: "Doble carne, doble sabor + papas.", price: 180 },
+    { id: "h4", section: "hamburguesas", name: "SABANDIJAS BURGER", desc: "Guacamole, morrón, tocino, queso + papas.", price: 180 },
+    { id: "h5", section: "hamburguesas", name: "LA SALADA", desc: "Aros de cebolla BBQ, tocino + papas.", price: 160, options: [{name:"Sencilla",price:0}, {name:"Doble",price:30}] },
+    { id: "h6", section: "hamburguesas", name: "BUFALO BURGER", desc: "Pechuga bufalo, queso monterrey + papas.", price: 170 },
+    { id: "h7", section: "hamburguesas", name: "BBQ BURGER", desc: "Pechuga BBQ, tocino, aros de cebolla + papas.", price: 165 },
+    { id: "h8", section: "hamburguesas", name: "LA ITALIANA", desc: "Salsa tomate, pepperoni, parmesano + papas.", price: 160, options: [{name:"Sencilla",price:0}, {name:"Doble",price:30}] },
+    
+    { id: "hd1", section: "hotdogs", name: "HOT DOG CLASICO", desc: "Pavo y tocino.", price: 60 },
+    { id: "hd2", section: "hotdogs", name: "CHILLI DOG", desc: "Con chilli beans y cheddar.", price: 75 },
+    { id: "hd3", section: "hotdogs", name: "1/4 DE LIBRA", desc: "Salchicha res y tocino.", price: 90 },
+    { id: "hd4", section: "hotdogs", name: "SABANDIJAS DOG", desc: "1/4 libra, cheddar y tocino.", price: 110 },
+    { id: "hd5", section: "hotdogs", name: "CHEESE DOG", desc: "3 quesos y tocino.", price: 85 },
+    
+    { id: "bn1", section: "boneless", name: "BONELESS BUFALO", price: 160, options: [{name:"Chica",price:0},{name:"Grande",price:40}] },
+    { id: "bn2", section: "boneless", name: "BONELESS BBQ", price: 160, options: [{name:"Chica",price:0},{name:"Grande",price:40}] },
+    { id: "bn3", section: "boneless", name: "MANGO HABANERO", price: 160, options: [{name:"Chica",price:0},{name:"Grande",price:40}] },
+    { id: "bn4", section: "boneless", name: "PAPAS BONELESS", price: 160, options: [{name:"Chica",price:0},{name:"Grande",price:40}] },
+    
+    { id: "al1", section: "alitas", name: "ALITAS BUFALO", price: 165, options: [{name:"Chica",price:0},{name:"Grande",price:55}] },
+    { id: "al2", section: "alitas", name: "ALITAS BBQ", price: 165, options: [{name:"Chica",price:0},{name:"Grande",price:55}] },
+    { id: "al3", section: "alitas", name: "ALITAS MANGO", price: 165, options: [{name:"Chica",price:0},{name:"Grande",price:55}] },
+    
+    { id: "ex1", section: "extras", name: "NACHOS CON CARNE", desc: "Queso, carne fina, tocino, guacamole.", price: 170 },
+    { id: "ex2", section: "extras", name: "PAPAS SABANDIJAS", desc: "Carne, tocino, guacamole, queso.", price: 160 },
+    { id: "ex3", section: "extras", name: "ORDEN PAPAS", price: 55 },
+    { id: "ex4", section: "extras", name: "GUACAMOLE EXTRA", price: 60 },
+    { id: "ex5", section: "extras", name: "ADEREZO EXTRA", price: 15 },
+    
+    { id: "d1", section: "desayunos", name: "CHILAQUILES", price: 120 },
+    { id: "d2", section: "desayunos", name: "CLUB SANDWICH", price: 140 },
+    { id: "d3", section: "desayunos", name: "OMELET SENCILLO", price: 110 },
+    { id: "d4", section: "desayunos", name: "TAMPIQUEÑA", price: 185 },
+    { id: "d5", section: "desayunos", name: "TACO GUISADO", price: 40 },
+    { id: "d6", section: "desayunos", name: "BURRO DESAYUNO", price: 85 },
+    { id: "d7", section: "desayunos", name: "ENCHILADAS (3)", price: 100 },
+    { id: "d8", section: "desayunos", name: "OMELET SABANDIJA", price: 155 },
+    { id: "d9", section: "desayunos", name: "HUEVOS AL GUSTO", price: 120 },
+    { id: "d10", section: "desayunos", name: "CONTINENTAL", price: 140 },
+    
+    { id: "dr1", section: "bebidas", name: "PONCHE", price: 45 },
+    { id: "dr2", section: "bebidas", name: "TE NEGRO", price: 45 },
+    { id: "dr3", section: "bebidas", name: "LIMONADA", price: 45 },
+    { id: "dr4", section: "bebidas", name: "AGUA", price: 30 },
+    { id: "dr5", section: "bebidas", name: "FRAPPE OREO", price: 70 },
+    { id: "dr6", section: "bebidas", name: "REFRESCO", price: 45 },
+    { id: "dr7", section: "bebidas", name: "CAFE", price: 45 },
+    { id: "dr8", section: "bebidas", name: "JUGO NARANJA", price: 60 },
+    { id: "dr9", section: "bebidas", name: "MALTEADA", price: 65 }
+];
+
+/* =========================================
+   2. APP STATE & CONFIG
+   ========================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyDAtElJUPzlT2rsKzQOC_e4mtQN9EgL_TY",
   authDomain: "sabandijasurbanfood-aa0f2.firebaseapp.com",
@@ -10,97 +74,31 @@ const firebaseConfig = {
   appId: "1:976944413697:web:5d23af6d6dcb376d1bd400"
 };
 
-/* --- VARIABLES --- */
-let db, auth;
-let MENU_DATA = [];
+let MENU_DATA = [...STATIC_MENU]; // Start with static data
 let CART = [];
+let db, auth;
 let isAdmin = false;
 
-/* --- INITIALIZATION --- */
+/* =========================================
+   3. INITIALIZATION
+   ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Render Gallery (Images 1-15)
-    renderGallery();
-    
-    // 2. Load Local Data IMMEDIATELY (No fetch, no waiting)
-    if(typeof DEFAULT_MENU_DATA !== 'undefined') {
-        MENU_DATA = DEFAULT_MENU_DATA;
-        renderMenu(); // Shows menu instantly
-    } else {
-        console.error("Critical: menu-data.js not loaded.");
-    }
+    // A. Render immediately using static data
+    renderMenu();
+    try { renderGallery(); } catch(e) { console.warn("Gallery error", e); }
 
-    // 3. Try connecting to Firebase (Silently)
-    initFirebase();
+    // B. Attempt Firebase Connection (Async)
+    setTimeout(initFirebase, 500); 
 });
 
-function initFirebase() {
-    try {
-        // Check if Firebase script loaded (wasn't blocked by AdBlock)
-        if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            auth = firebase.auth();
-            
-            // Listener for Admin Login
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    console.log("Admin Logged In");
-                    isAdmin = true;
-                    document.getElementById('admin-login-btn').style.display = 'none';
-                    document.getElementById('admin-add-btn').classList.add('visible');
-                    renderMenu(); // Re-render to show edit buttons
-                }
-            });
-
-            // Try to sync with Database (Overwrites local data if successful)
-            loadFromDatabase();
-        }
-    } catch (e) {
-        console.warn("Firebase blocked or failed. Running in static mode.");
-    }
-}
-
-async function loadFromDatabase() {
-    try {
-        const snapshot = await db.collection('menu').get();
-        if (!snapshot.empty) {
-            MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderMenu();
-            console.log("Updated with Live Database Data");
-        }
-    } catch (e) {
-        console.log("Database offline or blocked.");
-    }
-}
-
-/* --- RENDER FUNCTIONS --- */
-function renderGallery() {
-    const wrapper = document.getElementById('gallery-wrapper');
-    wrapper.innerHTML = '';
-    
-    // Loop 1 to 15
-    for (let i = 1; i <= 15; i++) {
-        const slide = document.createElement('div');
-        slide.className = 'swiper-slide';
-        // onerror hides broken images automatically
-        slide.innerHTML = `<img src="assets/images/${i}.jpeg" onclick="openLightbox(this.src)" onerror="this.style.display='none'">`;
-        wrapper.appendChild(slide);
-    }
-
-    new Swiper(".mySwiper", {
-        slidesPerView: 1.2,
-        centeredSlides: true,
-        spaceBetween: 15,
-        loop: true,
-        autoplay: { delay: 3000 },
-        pagination: { el: ".swiper-pagination", clickable: true },
-        breakpoints: { 768: { slidesPerView: 3, spaceBetween: 20 } }
-    });
-}
-
+/* =========================================
+   4. MENU RENDERING (The Critical Part)
+   ========================================= */
 function renderMenu() {
     const container = document.getElementById('menu-list');
-    container.innerHTML = '';
+    if(!container) return;
+    
+    container.innerHTML = ''; // Clear "Loading..."
 
     const sectionMap = {
         entradas: "Entradas",
@@ -127,6 +125,7 @@ function renderMenu() {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
+                // Admin Buttons (Only if logged in)
                 let adminHtml = '';
                 if (isAdmin) {
                     adminHtml = `
@@ -136,6 +135,7 @@ function renderMenu() {
                         </div>`;
                 }
 
+                // Options Dropdown
                 let selectHtml = '';
                 if(item.options && item.options.length > 0) {
                     selectHtml = `<select class="modern-select" id="opt-${item.id}">`;
@@ -162,7 +162,35 @@ function renderMenu() {
     });
 }
 
-/* --- CART FUNCTIONS --- */
+function renderGallery() {
+    const wrapper = document.getElementById('gallery-wrapper');
+    if(!wrapper) return;
+    wrapper.innerHTML = '';
+    
+    for (let i = 1; i <= 15; i++) {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        // 'onerror' hides image if 1.jpeg doesn't exist yet
+        slide.innerHTML = `<img src="assets/images/${i}.jpeg" onclick="openLightbox(this.src)" onerror="this.parentElement.style.display='none'">`;
+        wrapper.appendChild(slide);
+    }
+
+    if(typeof Swiper !== 'undefined') {
+        new Swiper(".mySwiper", {
+            slidesPerView: 1.2,
+            centeredSlides: true,
+            spaceBetween: 15,
+            loop: true,
+            autoplay: { delay: 3000 },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            breakpoints: { 768: { slidesPerView: 3, spaceBetween: 20 } }
+        });
+    }
+}
+
+/* =========================================
+   5. CART SYSTEM
+   ========================================= */
 function addToCart(itemId) {
     const item = MENU_DATA.find(i => i.id === itemId);
     if(!item) return;
@@ -250,22 +278,93 @@ function sendOrder() {
     const total = CART.reduce((sum, i) => sum + i.price, 0);
     msg += `%0A*TOTAL: $${total}*`;
     
-    // Change number here
     window.open(`https://wa.me/5216868798922?text=${msg}`, '_blank');
 }
 
-/* --- ADMIN FUNCTIONS --- */
+/* =========================================
+   6. ADMIN & FIREBASE
+   ========================================= */
+function initFirebase() {
+    // Only attempt if scripts loaded
+    if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+            
+            // Login Listener
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    isAdmin = true;
+                    document.getElementById('admin-login-btn').style.display = 'none';
+                    document.getElementById('admin-add-btn').classList.add('visible');
+                    renderMenu();
+                }
+            });
+
+            // Database Sync
+            db.collection('menu').get().then(snapshot => {
+                if (!snapshot.empty) {
+                    MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderMenu();
+                    console.log("Database Loaded");
+                }
+            }).catch(e => console.log("Using static data (DB offline)"));
+
+        } catch (e) { console.log("Firebase not configured"); }
+    }
+}
+
 function loginAdmin() {
     const e = document.getElementById('admin-email').value;
     const p = document.getElementById('admin-pass').value;
     if(auth) {
         auth.signInWithEmailAndPassword(e, p)
-            .then(() => document.getElementById('login-modal').classList.remove('open'))
+            .then(() => closeLoginModal())
             .catch(err => alert("Error: " + err.message));
     } else {
-        alert("Firebase no está conectado (Bloqueado por navegador o no configurado).");
+        alert("Firebase no está conectado.");
     }
 }
+
+function saveItem() {
+    if(!db) { alert("Base de datos no disponible."); return; }
+    
+    const id = document.getElementById('edit-id').value;
+    const itemData = {
+        section: document.getElementById('edit-section').value,
+        name: document.getElementById('edit-name').value,
+        desc: document.getElementById('edit-desc').value,
+        price: Number(document.getElementById('edit-price').value),
+        options: null // Simplified for basic editing
+    };
+
+    const action = id 
+        ? db.collection('menu').doc(id).update(itemData)
+        : db.collection('menu').add(itemData);
+
+    action.then(() => {
+        document.getElementById('item-modal').classList.remove('open');
+        // Refresh data
+        db.collection('menu').get().then(snapshot => {
+            MENU_DATA = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderMenu();
+        });
+    }).catch(e => alert(e.message));
+}
+
+function deleteItem(id) {
+    if(confirm("¿Eliminar?") && db) {
+        db.collection('menu').doc(id).delete().then(() => {
+            MENU_DATA = MENU_DATA.filter(i => i.id !== id);
+            renderMenu();
+        });
+    }
+}
+
+// Modal Helpers
+function openLoginModal() { document.getElementById('login-modal').classList.add('open'); }
+function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); }
 
 function openAdminModal() {
     document.getElementById('edit-id').value = '';
@@ -289,38 +388,9 @@ function openEditModal(id) {
     }
 }
 
-function saveItem() {
-    const id = document.getElementById('edit-id').value;
-    const itemData = {
-        section: document.getElementById('edit-section').value,
-        name: document.getElementById('edit-name').value,
-        desc: document.getElementById('edit-desc').value,
-        price: Number(document.getElementById('edit-price').value),
-        options: null
-    };
-
-    if(!db) {
-        alert("Error: Base de datos no conectada.");
-        return;
-    }
-
-    const promise = id 
-        ? db.collection('menu').doc(id).update(itemData)
-        : db.collection('menu').add(itemData);
-
-    promise.then(() => {
-        document.getElementById('item-modal').classList.remove('open');
-        loadFromDatabase(); 
-    }).catch(e => alert("Error al guardar: " + e.message));
-}
-
-function deleteItem(id) {
-    if(confirm("¿Eliminar este platillo?") && db) {
-        db.collection('menu').doc(id).delete().then(() => loadFromDatabase());
-    }
-}
-
-/* --- UTILS --- */
+/* =========================================
+   7. UTILS
+   ========================================= */
 function openLightbox(src) {
     document.getElementById('lightbox-img').src = src;
     document.getElementById('lightbox').classList.add('active');
